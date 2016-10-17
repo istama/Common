@@ -140,6 +140,21 @@ Public Class TestDateUtils
 		Next
 	End Sub
 	
+	<Test>
+	Public Sub TestGetWeekCountInMonth
+	  Dim d1 = New DateTime(2016, 10, 1)
+	  Assert.AreEqual(1, DateUtils.GetWeekCountInMonth(d1, DayOfWeek.Saturday))
+	  Assert.AreEqual(1, DateUtils.GetWeekCountInMonth(d1, DayOfWeek.Sunday))
+	  
+	  Dim d2 = New DateTime(2016, 10, 2)
+	  Assert.AreEqual(2, DateUtils.GetWeekCountInMonth(d2, DayOfWeek.Saturday))
+	  Assert.AreEqual(1, DateUtils.GetWeekCountInMonth(d2, DayOfWeek.Sunday))	  
+	  
+	  Dim d3 = New DateTime(2016, 10, 30)
+	  Assert.AreEqual(6, DateUtils.GetWeekCountInMonth(d3, DayOfWeek.Saturday))
+	  Assert.AreEqual(5, DateUtils.GetWeekCountInMonth(d3, DayOfWeek.Sunday))	
+	End Sub
+	
 '	<Test> _
 '	Public Sub Test
 '	  Dim d As DateTime

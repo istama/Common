@@ -83,6 +83,20 @@ Public Class DateUtils
     
     Return days
   End Function
+  
+  ''' <summary>
+  ''' 指定した日付がその月の第何週かを返す。
+  ''' </summary>
+  Public Shared Function GetWeekCountInMonth(d As DateTime, weekEnd As DayOfWeek) As Integer
+    Dim weekCount As Integer = 1
+    Dim weekBeginDay As DateTime = GetDateOfNextWeekDay(New DateTime(d.Year, d.Month, 1), weekEnd).AddDays(1)
+    While weekBeginDay <= d
+      weekCount += 1
+      weekBeginDay = weekBeginDay.AddDays(7)
+    End While
+    
+    Return weekCount
+  End Function
 End Class
 
 End Namespace
