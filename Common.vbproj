@@ -94,6 +94,7 @@
     <Compile Include="src\Text\MatchingText.vb" />
     <Compile Include="src\Threading\LRSemaphore.vb" />
     <Compile Include="src\Threading\MultiTask.vb" />
+    <Compile Include="src\Util\DateTerm.vb" />
     <Compile Include="src\Util\DateUtils.vb" />
     <Compile Include="src\Util\IOption.vb" />
     <Compile Include="src\Util\None.vb" />
@@ -111,6 +112,7 @@
     <Compile Include="test\IO\TestProperties.vb" />
     <Compile Include="test\Text\TestMatchingText.vb" />
     <Compile Include="test\Threading\TestLRSemaphore.vb" />
+    <Compile Include="test\Util\TestDateTerm.vb" />
     <Compile Include="test\Util\TestDateUtils.vb" />
     <Compile Include="test\Util\TestTextUtils.vb" />
     <Compile Include="test\Util\TestTimeUtils.vb" />
