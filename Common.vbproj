@@ -77,6 +77,10 @@
     <Compile Include="src\account\UserInfo.vb" />
     <Compile Include="src\account\UserInfoManager.vb" />
     <Compile Include="src\COM\Cell.vb" />
+    <Compile Include="src\COM\Excel2.vb" />
+    <Compile Include="src\COM\Excel3.vb" />
+    <Compile Include="src\COM\ExcelColumnNode.vb" />
+    <Compile Include="src\COM\ExcelReaderByColumnTree.vb" />
     <Compile Include="src\COM\ExcelWriter.vb" />
     <Compile Include="src\COM\IExcel.vb" />
     <Compile Include="src\COM\Resource.vb" />
@@ -105,6 +109,7 @@
     <Compile Include="test\Account\TestUserInfo.vb" />
     <Compile Include="test\Account\TestUserInfoManager.vb" />
     <Compile Include="test\COM\TestCell.vb" />
+    <Compile Include="test\COM\TestExcelColumnNode.vb" />
     <Compile Include="test\COM\TestExcelWriter.vb" />
     <Compile Include="test\Format\TestCSV.vb" />
     <Compile Include="test\IO\TestAppProperties.vb" />
