@@ -8,7 +8,7 @@ Public Class Log
   
   Public Shared Sub SetFilePath(path As String)
     file = New TextFile(path, System.Text.Encoding.UTF8)
-    file.Close
+    file.Reset
   End Sub
   
   Public Shared Sub out(text As String)
