@@ -46,6 +46,12 @@ Public Structure ExcelColumnNode
     Me.childs.Add(node)
   End Sub
   
+  ''' <summary>
+  ''' このExcelColumnNodeをDataTableに変換したときの列のコレクションを取得する。
+  ''' </summary>
+  Public Function ToDataColumnCollection As DataColumnCollection
+    Return ToDataTable.Columns
+  End Function
   
   ''' <summary>
   ''' このExcelColumnNodeのツリーをDataTableに変換する。
