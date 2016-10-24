@@ -12,7 +12,7 @@ Public Structure ExcelColumnNode
   Private ReadOnly name As String
   Private ReadOnly col As String
   
-  Private ReadOnly notContaindeToDataTable As Boolean
+  Private ReadOnly notContainedToDataTable As Boolean
   
   Private ReadOnly childs As List(Of ExcelColumnNode)
   
@@ -22,7 +22,7 @@ Public Structure ExcelColumnNode
     
     Me.col = col
     Me.name = name
-    Me.notContaindeToDataTable = notContaindeToDataTable
+    Me.notContainedToDataTable = notContainedToDataTable
     Me.childs = New List(Of ExcelColumnNode)
   End Sub
   
@@ -35,7 +35,7 @@ Public Structure ExcelColumnNode
   End Function
   
   Public Function ContainedToDataTable() As Boolean
-    Return Not Me.notContaindeToDataTable
+    Return Me.notContainedToDataTable = False
   End Function
   
   Public Function GetChilds() As List(Of ExcelColumnNode)
@@ -46,6 +46,32 @@ Public Structure ExcelColumnNode
     Me.childs.Add(node)
   End Sub
   
+  
+  ''' <summary>
+  ''' このExcelColumnNodeのツリーをDataTableに変換する。
+  ''' </summary>
+  Public Function ToDataTable() As DataTable
+    Dim table As New DataTable
+    Me.AddColumns(table)
+    
+    Return table
+  End Function
+  
+  Private Sub AddColumns(table As DataTable)
+    If Me.ContainedToDataTable Then
+      table.Columns.Add(Me.CreateColumn(Me.name))
+    End If
+    
+    Me.GetChilds.ForEach(Sub(n) n.AddColumns(table))
+  End Sub
+    
+  Public Function CreateColumn(name As String) As DataColumn
+    Dim col As New DataColumn
+    col.ColumnName = name
+    col.AutoIncrement = False
+		
+		Return col
+	End FUnction
 End Structure
 
 End Namespace
