@@ -65,7 +65,7 @@ Public Structure ExcelColumnNode
     Me.GetChilds.ForEach(Sub(n) n.AddColumns(table))
   End Sub
     
-  Public Function CreateColumn(name As String) As DataColumn
+  Private Function CreateColumn(name As String) As DataColumn
     Dim col As New DataColumn
     col.ColumnName = name
     col.AutoIncrement = False
