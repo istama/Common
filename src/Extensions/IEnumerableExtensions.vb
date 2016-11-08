@@ -68,6 +68,14 @@ Public Module IEnumerableExtensions
     Next
     Return list
   End Function
+  
+  <System.Runtime.CompilerServices.ExtensionAttribute()>
+  Public Function Hold(Of T, T2)(c As IEnumerable(Of T), init As T2, f As Func(Of T, T2, T2)) As T2
+    For Each i As T In c
+      init = f(i, init)
+    Next
+    Return init
+  End Function
 End Module
 
 End Namespace
