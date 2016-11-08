@@ -37,7 +37,8 @@ Public Class TextFile
   End Function
   
   ''' <summary>
-  ''' ファイルを作成　すでにある場合は何もしない
+  ''' ファイルを作成　すでにある場合は何もしない。
+  ''' ファイルが新たに作成されたときにTrueを返す。
   ''' </summary>
   Public Function Create() As Boolean
     If Not File.Exists(filepath) Then
@@ -117,6 +118,24 @@ Public Class TextFile
       Do While line IsNot Nothing
         f(line)
         line = stream.ReadLine()
+      Loop
+    End Using    
+  End Sub
+  
+  ''' <summary>
+  ''' ファイルを１行ずつ読み込みそのつど引数の関数に文字列を渡す。
+  ''' コールバック関数がFalseを返したらファイルの読み込みを中止する。
+  ''' </summary>
+  ''' <param name="f">コールバック関数</param>
+  Public Sub Read(f As Func(Of String, Boolean))
+    Using stream As New StreamReader(filepath, encoding)
+      Dim line As String = stream.ReadLine()
+      Do While line IsNot Nothing
+        If Not f(line) Then
+          line = Nothing
+        Else
+          line = stream.ReadLine()
+        End If
       Loop
     End Using    
   End Sub
