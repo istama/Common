@@ -12,11 +12,13 @@ Public Class Log
   End Sub
   
   Public Shared Sub out(text As String)
-    SyncLock file
-      If file IsNot Nothing Then
-        file.Append(text)
-      End If
-    End SyncLock
+    If file IsNot Nothing Then
+      SyncLock file
+        If file IsNot Nothing Then
+          file.Append(text)
+        End If
+      End SyncLock
+    End If
   End Sub
 End Class
 
