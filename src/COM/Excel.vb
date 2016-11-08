@@ -371,7 +371,7 @@ Class Book
   
   Sub Close()
     SyncLock Me
-      If closed Then 
+      If Not closed Then 
         For Each k In sheetTable.Keys
           CloseSheet(k)				
         Next
