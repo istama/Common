@@ -87,7 +87,9 @@
     <Compile Include="src\COM\Excel.vb" />
     <Compile Include="src\COM\ExcelException.vb" />
     <Compile Include="src\Data\EnumerableDataRowCollection.vb" />
+    <Compile Include="src\Extensions\DataRowExtensions.vb" />
     <Compile Include="src\Extensions\IEnumerableExtensions.vb" />
+    <Compile Include="src\Extensions\StringExtensions.vb" />
     <Compile Include="src\Format\CSV.vb" />
     <Compile Include="src\IO\AppProperties.vb" />
     <Compile Include="src\IO\Log.vb" />
