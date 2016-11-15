@@ -85,7 +85,7 @@ Public Structure DateTerm
   ''' 期間を１週間おきに分割したリストを返す。
   ''' </summary>
   Public Function WeeklyTerms() As List(Of DateTerm)
-    If Me.WeeklyTerms Is Nothing Then
+    If Me.WeeklyTermList Is Nothing Then
       Return WeeklyTerms(DayOfWeek.Saturday, Function(b, e) String.Empty)
     Else
       Return Me.weeklyTermList
