@@ -43,11 +43,7 @@ Public Class ExcelReaderByColumnTree
   Private Sub Read(row As Integer, filepath As String, sheetName As String, columnNodes As ExcelColumnNode, result As IDictionary(Of String, String))
     Dim cell As Cell = Cell.Create(row, columnNodes.GetCol)
     'Dim value As String = excel.Read(New ExcelData("", filepath, sheetName, cell))
-    Dim i As Integer = cell.Row + Asc(cell.Col)
-    Dim value As String = ""
-    If i Mod 5 <> 0 Then
-      value = i.ToString
-    End IF
+    Dim value As String = debugRead(row, filepath, sheetName, cell).ToString
     
     ' データテーブルに含めるノードかどうか判定
     If columnNodes.ContainedToDataTable Then
@@ -65,6 +61,23 @@ Public Class ExcelReaderByColumnTree
         Sub(node) Read(row, filepath, sheetName, node, result))
     End If
   End Sub
+  
+  Private Function debugRead(row As Integer, filepath As String, sheetName As String, cell As Cell) As String
+    Dim value As Integer = (cell.Row + Asc(cell.Col))
+    If value Mod 6 = 0 Then
+      Return String.Empty
+    End If
+    
+    Dim m As Integer = 1
+    For i = 1 To 12
+      If sheetName = i.ToString & "月分" Then
+        m = i
+        Exit For
+      End If
+    Next
+    
+    Return (value + m).ToString
+  End Function
 End Class
 
 End Namespace
