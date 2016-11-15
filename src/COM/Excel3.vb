@@ -78,7 +78,9 @@ Public Class Excel3
   Public Sub Open(filepath As String, readMode As Boolean)
     If Not initialized Then Throw New ExcelException("初期処理が実行されていません。")
     
-    Me.app.OpenBook(filepath, readMode)
+    SyncLock Me
+      Me.app.OpenBook(filepath, readMode)
+    End SyncLock
   End Sub
   
   ''' <summary>
@@ -87,8 +89,9 @@ Public Class Excel3
   ''' <param name="filepath"></param>
   Public Sub Close(filepath As String) Implements IExcel.Close
     If Not initialized Then Throw New ExcelException("初期処理が実行されていません。")
-    
-    Me.app.CloseBook(filepath)
+    SyncLock Me
+      Me.app.CloseBook(filepath)
+    End SyncLock
   End Sub
   
   ''' <summary>
@@ -141,7 +144,9 @@ Public Class Excel3
     Try
       rwLock.AcquireReaderLock(System.Threading.Timeout.Infinite)
       If Me.initialized Then
-        result = f(app)
+        SyncLock Me
+          result = f(app)
+        End SyncLock
       End If
     Catch ex As Exception
       Throw New ExcelException(ex.Message)
@@ -221,6 +226,7 @@ Class App3
       Try
         Me.rwLock.AcquireReaderLock(Timeout.Infinite)
         If Not Me.closed Then
+          Log.out("open book / filepath: " & filepath & " readMode: " & readMode.ToString)
           Me.bookTable.TryAdd(fullpath, Book3.GetInstance(Me.workbooks, fullpath, readMode))
         End If
       Finally
@@ -237,7 +243,9 @@ Class App3
   ''' <param name="filepath"></param>
   Sub CloseBook(filepath As String)
     Dim book As Book3 = Nothing
+    Log.out("book will get / filepath: " & filepath)
     If Me.bookTable.TryRemove(Path.GetFullPath(filePath), book) Then
+      Log.out("book will close / filepath: " & filepath)
       book.Close()
     End If
   End Sub
@@ -326,9 +334,11 @@ Class Book3
     Try
       Me.rwLock.AcquireWriterLock(Timeout.Infinite)
       If Not closed Then 
-        For Each k In sheetTable.Keys
-          CloseSheet(k)				
-        Next
+        Log.out("sheets will close")
+        ' クローズできないのでなくす
+        'For Each k In sheetTable.Keys
+        '  CloseSheet(k)				
+        'Next
         
         Resource.Release(worksheets)
         book.Close(False)
@@ -344,8 +354,11 @@ Class Book3
   
   Sub CloseSheet(sheetName As String)
     Dim sheet As Sheet3 = Nothing
+    Log.out("sheet will get / sheetName: " & sheetName)
     If Me.sheetTable.TryRemove(sheetName, sheet) Then
+      Log.out("sheet will close / sheetName: " & sheetName)
       sheet.Close()
+      Me.sheetTable.TryRemove(sheetName, Nothing)
     End If
   End Sub
   
@@ -432,6 +445,7 @@ Class Sheet3
     Me.rwLock.AcquireWriterLock(Timeout.Infinite)
     Try
       If Not Me.closed Then
+        Log.out("sheet will close / sheet name: " & Me.sheet.Name)
         Resource.Release(Me.sheet)
         closed = True
         Log.out("closed sheet / sheet name: " & Me.sheet.Name)
