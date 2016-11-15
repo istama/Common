@@ -8,6 +8,7 @@ Namespace Extensions
   
 Public Module DataRowExtensions
   
+  
   ''' <summary>
   ''' すべての列をDouble型で加算する。
   ''' Double型に変換できない列は何もしない。
@@ -19,7 +20,6 @@ Public Module DataRowExtensions
       Dim name As String = col.ColumnName
       Dim value As Double
       If Not System.Convert.IsDBNull(addedRow(name)) AndAlso Double.TryParse(addedRow(name).ToString, value) Then
-        Log.out("PlusRow")
         Dim sum As Double
         If Not System.Convert.IsDBNull(dataRow(name)) AndAlso Double.TryParse(dataRow(name).ToString, sum) Then
           dataRow(name) = (value + sum).ToString
