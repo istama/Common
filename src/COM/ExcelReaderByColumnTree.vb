@@ -16,11 +16,11 @@ Public Class ExcelReaderByColumnTree
   End Sub
   
   Public Sub Open(filepath As String, readMode As Boolean)
-    'Me.excel.Open(filepath, readMode)
+    Me.excel.Open(filepath, readMode)
   End Sub
   
   Public Sub Close(filepath As String)
-    'Me.excel.Close(filepath)
+    Me.excel.Close(filepath)
   End Sub
   
   ''' <summary>
@@ -42,8 +42,8 @@ Public Class ExcelReaderByColumnTree
   ''' </summary>
   Private Sub Read(row As Integer, filepath As String, sheetName As String, columnNodes As ExcelColumnNode, result As IDictionary(Of String, String))
     Dim cell As Cell = Cell.Create(row, columnNodes.GetCol)
-    'Dim value As String = excel.Read(New ExcelData("", filepath, sheetName, cell))
-    Dim value As String = debugRead(row, filepath, sheetName, cell).ToString
+    Dim value As String = excel.Read(New ExcelData("", filepath, sheetName, cell))
+    'Dim value As String = debugRead(row, filepath, sheetName, cell).ToString
     
     ' データテーブルに含めるノードかどうか判定
     If columnNodes.ContainedToDataTable Then
