@@ -11,17 +11,23 @@ Namespace COM
 Public Structure ExcelColumnNode
   Private ReadOnly name As String
   Private ReadOnly col As String
+  Private ReadOnly type As Type
   
   Private ReadOnly notContainedToDataTable As Boolean
   
   Private ReadOnly childs As List(Of ExcelColumnNode)
   
-  Public Sub New(col As String, Optional name As String="", Optional notContainedToDataTable As Boolean=False)
+  Public Sub New(col As String, Optional name As String="", Optional type As Type=Nothing, Optional notContainedToDataTable As Boolean=False)
     If col Is Nothing Then Throw New ArgumentNullException("col is null")
     If Not Cell.ValidColumn(col) Then Throw New ArgumentException("col is invalid value / " & col)
     
+    If type Is Nothing Then
+      type = GetType(String)
+    End If
+    
     Me.col = col
     Me.name = name
+    Me.type = type
     Me.notContainedToDataTable = notContainedToDataTable
     Me.childs = New List(Of ExcelColumnNode)
   End Sub
@@ -58,23 +64,24 @@ Public Structure ExcelColumnNode
   ''' </summary>
   Public Function ToDataTable() As DataTable
     Dim table As New DataTable
-    Me.AddColumns(table)
+    Me.AddColumnsTo(table)
     
     Return table
   End Function
   
-  Private Sub AddColumns(table As DataTable)
+  Private Sub AddColumnsTo(table As DataTable)
     If Me.ContainedToDataTable Then
-      table.Columns.Add(Me.CreateColumn(Me.name))
+      table.Columns.Add(Me.CreateColumn(Me.name, Me.type))
     End If
     
-    Me.GetChilds.ForEach(Sub(n) n.AddColumns(table))
+    Me.GetChilds.ForEach(Sub(n) n.AddColumnsTo(table))
   End Sub
     
-  Private Function CreateColumn(name As String) As DataColumn
+  Private Function CreateColumn(name As String, type As Type) As DataColumn
     Dim col As New DataColumn
     col.ColumnName = name
     col.AutoIncrement = False
+    col.DataType = type
 		
 		Return col
 	End FUnction

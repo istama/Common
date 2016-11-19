@@ -39,12 +39,12 @@ Public Class TestExcelColumnNode
   
   <Test>
   Public Sub TestToDateTable
-    Dim n1 As New ExcelColumnNode("A", "root", True)
+    Dim n1 As New ExcelColumnNode("A", "root", GetType(String), True)
     Dim n2 As New ExcelColumnNode("B", "c1")
     Dim n3 As New ExcelColumnNode("C", "c2")
     Dim n4 As New ExcelColumnNode("D", "c1-1")
     Dim n5 As New ExcelColumnNode("E", "c1-2")
-    Dim n6 As New ExcelColumnNode("F", "c2-1", True)
+    Dim n6 As New ExcelColumnNode("F", "c2-1", GetType(String), True)
     Dim n7 As New ExcelColumnNode("G", "c2-1-1")
     
     n1.AddChild(n2)
