@@ -287,7 +287,7 @@ Class App3
   End Sub
   
   Private Function Open(filepath As String, f As Func(Of Book3, String)) As String
-    If Not Me.closed Then Throw New InvalidOperationException("Excelアプリケーションはすでに閉じられています。")
+    If Me.closed Then Throw New InvalidOperationException("Excelアプリケーションはすでに閉じられています。")
     
     Dim result As String = String.Empty
     
