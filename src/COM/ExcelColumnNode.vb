@@ -17,17 +17,12 @@ Public Structure ExcelColumnNode
   
   Private ReadOnly childs As List(Of ExcelColumnNode)
   
-  Public Sub New(col As String, Optional name As String="", Optional type As Type=Nothing, Optional containedToDataTable As Boolean=True)
+  Public Sub New(col As String, Optional name As String="", Optional containedToDataTable As Boolean=True)
     If col Is Nothing Then Throw New ArgumentNullException("col is null")
     If Not Cell.ValidColumn(col) Then Throw New ArgumentException("col is invalid value / " & col)
     
-    If type Is Nothing Then
-      type = GetType(String)
-    End If
-    
     Me.col = col
     Me.name = name
-    Me.type = type
     Me._containedToDataTable = containedToDataTable
     Me.childs = New List(Of ExcelColumnNode)
   End Sub
