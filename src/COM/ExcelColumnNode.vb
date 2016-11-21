@@ -51,40 +51,6 @@ Public Structure ExcelColumnNode
   Public Sub AddChild(node As ExcelColumnNode)
     Me.childs.Add(node)
   End Sub
-  
-  ''' <summary>
-  ''' このExcelColumnNodeをDataTableに変換したときの列のコレクションを取得する。
-  ''' </summary>
-  Public Function ToDataColumnCollection As DataColumnCollection
-    Return ToDataTable.Columns
-  End Function
-  
-  ''' <summary>
-  ''' このExcelColumnNodeのツリーをDataTableに変換する。
-  ''' </summary>
-  Public Function ToDataTable() As DataTable
-    Dim table As New DataTable
-    Me.AddColumnsTo(table)
-    
-    Return table
-  End Function
-  
-  Private Sub AddColumnsTo(table As DataTable)
-    If Me.ContainedToDataTable Then
-      table.Columns.Add(Me.CreateColumn(Me.name, Me.type))
-    End If
-    
-    Me.GetChilds.ForEach(Sub(n) n.AddColumnsTo(table))
-  End Sub
-    
-  Private Function CreateColumn(name As String, type As Type) As DataColumn
-    Dim col As New DataColumn
-    col.ColumnName = name
-    col.AutoIncrement = False
-    col.DataType = type
-		
-		Return col
-	End FUnction
 End Structure
 
 End Namespace
