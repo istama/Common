@@ -7,20 +7,20 @@ Namespace COM
 ''' Excelの指定した行の列を、列の木構造のコレクションにもとづいて読み込むクラス。
 ''' </summary>
 Public Class ExcelReaderByColumnTree
-  Private ReadOnly excel As Excel3
+  Private ReadOnly excel As Excel4
   
-  Public Sub New(excel As Excel3)
+  Public Sub New(excel As Excel4)
     If excel Is Nothing Then Throw New ArgumentNullException("excel is null")
     
     Me.excel = excel
   End Sub
   
   Public Sub Open(filepath As String, readMode As Boolean)
-    Me.excel.Open(filepath, readMode)
+    'Me.excel.Open(filepath, readMode)
   End Sub
   
   Public Sub Close(filepath As String)
-    Me.excel.Close(filepath)
+    'Me.excel.Close(filepath)
   End Sub
   
   ''' <summary>
@@ -42,8 +42,8 @@ Public Class ExcelReaderByColumnTree
   ''' </summary>
   Private Sub Read(row As Integer, filepath As String, sheetName As String, columnNodes As ExcelColumnNode, result As IDictionary(Of String, String))
     Dim cell As Cell = Cell.Create(row, columnNodes.GetCol)
-    Dim value As String = excel.Read(New ExcelData("", filepath, sheetName, cell))
-    'Dim value As String = debugRead(row, filepath, sheetName, cell).ToString
+    'Dim value As String = excel.Read(New ExcelData("", filepath, sheetName, cell))
+    Dim value As String = debugRead(row, filepath, sheetName, cell).ToString
     
     ' データテーブルに含めるノードかどうか判定
     If columnNodes.ContainedToDataTable Then
@@ -56,7 +56,7 @@ Public Class ExcelReaderByColumnTree
       End If
     End If
     
-    If value IsNot String.Empty Then
+    If Not String.IsNullOrWhiteSpace(value) Then
       columnNodes.GetChilds.ForEach(
         Sub(node) Read(row, filepath, sheetName, node, result))
     End If
