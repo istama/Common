@@ -61,12 +61,12 @@ Public Module IEnumerableExtensions
   End Function
   
   <System.Runtime.CompilerServices.ExtensionAttribute()>
-  Public Function Filter(Of T)(c As IEnumerable(Of T), f As Func(Of T, Boolean)) As IEnumerable(Of T)
-    Dim list As New List(Of T)
+  Public Iterator Function _Where(Of T)(c As IEnumerable(Of T), f As Func(Of T, Boolean)) As IEnumerable(Of T)
     For Each i As T In c
-      If f(i) Then list.Add(i)
+      If f(i) Then
+        Yield i
+      End If
     Next
-    Return list
   End Function
   
   <System.Runtime.CompilerServices.ExtensionAttribute()>
