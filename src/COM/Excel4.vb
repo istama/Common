@@ -15,7 +15,7 @@ Namespace COM
   
 ''' <summary>
 ''' Excelにアクセスするクラス。
-''' このクラスは同一のExcelファイルの開く/閉じるの操作を読み込み/書き込みの操作と同じスレッドで行えばスレッドセーフである。
+''' このクラスはスレッドセーフでないので単一のスレッドから実行されるべき。
 ''' </summary>
 Public Class Excel4
   Private ReadOnly KEY_BOOK As String = "__book__*"
@@ -24,13 +24,7 @@ Public Class Excel4
   
   Private excel As Object
   Private workbooks As Object
-  Private bookTable As ConcurrentDictionary(Of String, ConcurrentDictionary(Of String, Object))
-  
-  ''' <summary>
-  ''' 初期処理と終了処理を行うときはWriterLock、
-  ''' 開く、閉じる、読み込み、書き込みを行うときはReaderLockをかける。
-  ''' </summary>
-  Private ReadOnly rwLock As New ReaderWriterLock
+  Private bookTable As Dictionary(Of String, Dictionary(Of String, Object))
   
   Public Sub New()
   End Sub
@@ -39,38 +33,28 @@ Public Class Excel4
   ''' 初期処理を行う。
   ''' </summary>
   Public Sub Init()
-    Try
-      Me.rwLock.AcquireWriterLock(Timeout.Infinite)
-      If Not initialized Then
-        Me.excel = CreateObject("Excel.Application")
-        Me.workbooks = excel.WorkBooks
-        Me.bookTable = New ConcurrentDictionary(Of String, ConcurrentDictionary(Of String, Object))
-        
-        initialized = True
-        Log.out("initialized excel")
-      End If
-    Finally
-      Me.rwLock.ReleaseWriterLock()
-    End Try
+    If Not initialized Then
+      Me.excel = CreateObject("Excel.Application")
+      Me.workbooks = excel.WorkBooks
+      Me.bookTable = New Dictionary(Of String, Dictionary(Of String, Object))
+      
+      initialized = True
+      Log.out("initialized excel")
+    End If
   End Sub
   
   ''' <summary>
   ''' 終了処理を行う。
   ''' </summary>
   Public Sub Quit()
-    Try
-      Me.rwLock.AcquireWriterLock(Timeout.Infinite)
-      If initialized Then
-        Me.bookTable.Keys.ForEach(Sub(path) Close(path))
-        Resource.Release(Me.workBooks)
-        Me.excel.Quit()
-        
-        initialized = False
-        Log.out("quit excel")
+    If initialized Then
+      Me.bookTable.Keys.ForEach(Sub(path) Close(path))
+      Resource.Release(Me.workBooks)
+      Me.excel.Quit()
+      
+      initialized = False
+      Log.out("quit excel")
       End If
-    Finally
-      Me.rwLock.ReleaseWriterLock
-    End Try
   End Sub
   
   ''' <summary>
@@ -88,19 +72,13 @@ Public Class Excel4
     End If
     
     If Not Me.bookTable.ContainsKey(fullpath) Then
-      Dim sheetTable As New ConcurrentDictionary(Of String, Object)
-      Try
-        Me.rwLock.AcquireReaderLock(Timeout.Infinite)       
-        SyncLock Me
-          If Not Me.initialized Then
-            Log.out("open book / filepath: " & filepath & " readMode: " & readMode.ToString)
-            sheetTable.TryAdd(KEY_BOOK, workbooks.Open(fullPath, Nothing, readMode))
-            Me.bookTable.TryAdd(fullpath, sheetTable)
-          End If
-        End SyncLock
-      Finally
-        Me.rwLock.ReleaseReaderLock
-      End Try
+      Dim sheetTable As New Dictionary(Of String, Object)
+      
+      If Me.initialized Then
+        sheetTable.Add(KEY_BOOK, workbooks.Open(fullPath, Nothing, readMode))
+        Me.bookTable.Add(fullpath, sheetTable)
+        Log.out("open book / filepath: " & filepath & " readMode: " & readMode.ToString)
+      End If
     End If  
   End Sub
   
@@ -110,33 +88,19 @@ Public Class Excel4
   Public Sub Close(filepath As String)
     If filepath Is Nothing Then Throw New ArgumentNullException("filepath is null")
     
-    Dim sheetTable As ConcurrentDictionary(Of String, Object) = Nothing
-    If Me.bookTable.TryRemove(Path.GetFullPath(filePath), sheetTable) Then
-      Try
-        Me.rwLock.AcquireReaderLock(Timeout.Infinite)  
-        SyncLock Me
-          ' シートを解放する
-  '        sheetTable.Keys.
-  '          Where(Function(k) k <> KEY_BOOK).
-  '          ForEach(
-  '            Sub(k)
-  '              Dim sheet As Object = Nothing
-  '              If sheetTable.TryRemove(k, sheet) Then
-  '                Resource.Release(sheet)
-  '              End If
-  '            End Sub)
-          
-          Dim book As Object = Nothing
-          If sheetTable.TryRemove(KEY_BOOK, book) Then
-            Resource.Release(book.worksheets)
-            book.Close(False)
-            Resource.Release(book)
-            Log.out("book close / filepath: " & filepath)
-          End If
-        End SyncLock
-      Finally
-        Me.rwLock.ReleaseReaderLock        
-      End Try
+    Dim fullpath As String = Path.GetFullPath(filePath)
+    
+    If Me.bookTable.ContainsKey(fullpath) Then
+      Dim sheetTable As Dictionary(Of String, Object) = Me.bookTable(fullpath)
+      Me.bookTable.Remove(fullpath)
+      
+      If sheetTable.ContainsKey(KEY_BOOK) Then
+        Dim book As Object = sheetTable(KEY_BOOK)
+        sheetTable.Remove(KEY_BOOK)
+        book.Close(False)
+        Resource.Release(book)
+        Log.out("book close / filepath: " & filepath)
+      End If
     End If
   End Sub
   
@@ -148,14 +112,10 @@ Public Class Excel4
     If sheetName Is Nothing Then Throw New ArgumentNullException("sheetName is null")
     If cell      Is Nothing Then Throw New ArgumentNullException("cell is null")
     
+    'Log.out("read excel / filepath: " & filepath & " sheetName: " & sheetName & " cell: " & cell.ToString)
     Dim fullpath As String = Path.GetFullPath(filepath)
     
-    Try
-      Me.rwLock.AcquireReaderLock(Timeout.Infinite)
-      Return AccessCell(fullpath, sheetName, cell, Function(rng) rng.Value)
-    Finally
-      Me.rwLock.ReleaseReaderLock
-    End Try
+    Return AccessCell(fullpath, sheetName, cell, Function(rng) rng.Value)
   End Function
   
   ''' <summary>
@@ -166,23 +126,17 @@ Public Class Excel4
     If sheetName Is Nothing Then Throw New ArgumentNullException("sheetName is null")
     If cell      Is Nothing Then Throw New ArgumentNullException("cell is null")
     
+    'Log.out("write to excel / filepath: " & filepath & " sheetName: " & sheetName & " cell: " & cell.ToString & " text: " & text)
     Dim fullpath As String = Path.GetFullPath(filepath)
     
-    Try
-      Me.rwLock.AcquireReaderLock(Timeout.Infinite)
-      AccessCell(fullpath, sheetName, cell,
-        Function(rng)
-          rng.Value = text
-          Return Nothing
-        End Function)
-      
-      Dim book As Object = GetBook(fullpath)
-      SyncLock Me
-        book.Save()
-      End SyncLock
-    Finally
-      Me.rwLock.ReleaseReaderLock
-    End Try
+    AccessCell(fullpath, sheetName, cell,
+      Function(rng)
+        rng.Value = text
+        Return Nothing
+      End Function)
+    
+    Dim book As Object = GetBook(fullpath)
+    book.Save()
   End Sub
   
   ''' <summary>
@@ -194,13 +148,11 @@ Public Class Excel4
     Dim sheet As Object = GetSheet(fullpath, sheetName)
     
     Dim result As String = String.Empty
-    SyncLock Me
-      Dim rng As Object = sheet.Range(cell.Point)
-      If rng IsNot Nothing Then
-        result = f(rng)
-        Resource.Release(rng)
-      End If
-    End SyncLock
+    Dim rng As Object = sheet.Range(cell.Point)
+    If rng IsNot Nothing Then
+      result = f(rng)
+      Resource.Release(rng)
+    End If
     
     Return result
   End Function  
@@ -209,13 +161,12 @@ Public Class Excel4
   ''' 指定したExcelファイルのCOMコンポーネントを収めたテーブルを取得する。
   ''' 指定したExcelファイルが開かれていない場合は例外を投げる。
   ''' </summary>
-  Private Function GetSheetTable(fullpath As String) As ConcurrentDictionary(Of String, Object)
-    Dim sheetTable As ConcurrentDictionary(Of String, Object) = Nothing
-    If Not Me.bookTable.TryGetValue(fullpath, sheetTable) Then
+  Private Function GetSheetTable(fullpath As String) As Dictionary(Of String, Object)
+    If Not Me.bookTable.ContainsKey(fullpath) Then
       Throw New ArgumentException("指定されたExcelファイルは開かれていません。 / " & fullpath)
     End If
     
-    Return sheetTable
+    Return Me.bookTable(fullpath)
   End Function
   
   ''' <summary>
@@ -223,13 +174,12 @@ Public Class Excel4
   ''' 指定したExcelファイルが開かれていない場合は例外を投げる。
   ''' </summary>
   Private Function GetBook(fullpath As String) As Object
-    Dim sheetTable As ConcurrentDictionary(Of String, Object) = GetSheetTable(fullpath)
-    Dim book As Object = Nothing
-    If Not sheetTable.TryGetValue(KEY_BOOK, book) Then
+    Dim sheetTable As Dictionary(Of String, Object) = GetSheetTable(fullpath)
+    If Not sheetTable.ContainsKey(KEY_BOOK) Then
       Throw New ArgumentException("指定されたExcelファイルは開かれていません。 / " & fullpath)
     End If
     
-    Return book
+    Return sheetTable(KEY_BOOK)
   End Function
   
   ''' <summary>
@@ -238,29 +188,28 @@ Public Class Excel4
   ''' 指定した名前のシートが存在しない場合は例外を投げる。
   ''' </summary>
   Private Function GetSheet(fullpath As String, sheetName As String) As Object
-    Dim sheetTable As ConcurrentDictionary(Of String, Object) = GetSheetTable(fullpath)
-    
+    Dim sheetTable As Dictionary(Of String, Object) = GetSheetTable(fullpath)
     Dim sheet As Object = Nothing
-    If Not sheetTable.TryGetValue(sheet, sheetName) Then
-      Dim book As Object = Nothing
-      If Not sheetTable.TryGetValue(KEY_BOOK, book) Then
+    If Not sheetTable.ContainsKey(sheetName) Then
+      If Not sheetTable.ContainsKey(KEY_BOOK) Then
         Throw New ArgumentException("指定されたExcelファイルは開かれていません。 / " & fullpath)
       End If
+      Dim book As Object = sheetTable(KEY_BOOK)
       
-      SyncLock Me
-        ' ブックから指定した名前のシートを探す
-        For Each sh As Object In book.worksheets
-          If sheetName = sh.Name Then
-            sheet = sh
-            sheetTable.TryAdd(sheetName, sheet)
-            Exit For
-          End If
-        Next
-      End SyncLock
+      ' ブックから指定した名前のシートを探す
+      For Each sh As Object In book.worksheets
+        If sheetName = sh.Name Then
+          sheet = sh
+          sheetTable.Add(sheetName, sheet)
+          Exit For
+        End If
+      Next
       
       If sheet Is Nothing Then
         Throw New ArgumentException("指定した名前のExcelシートが見つかりません。 / " & sheetName)
       End If
+    Else
+      sheet = sheetTable(sheetName)
     End If
     
     Return sheet
