@@ -50,6 +50,20 @@ Public Module DataRowExtensions
       End If
     Next
   End Sub
+  
+  <System.Runtime.CompilerServices.ExtensionAttribute()>
+  Public Function IsNull(dataRow As DataRow, columnName As String) As Boolean
+    If Not dataRow.HasColumn(columnName) Then
+      Throw New ArgumentException("指定された列名は存在しません。 / " & columnName)
+    End If
+    
+    Return System.Convert.IsDBNull(dataRow(columnName))
+  End Function
+  
+  <System.Runtime.CompilerServices.ExtensionAttribute()>
+  Public Function HasColumn(dataRow As DataRow, columnName As String) As Boolean
+    Return dataRow.Table.Columns.Contains(columnName)
+  End Function
 End Module
 
 End Namespace
