@@ -16,11 +16,15 @@ Public Class ExcelReaderByColumnTree
   End Sub
   
   Public Sub Open(filepath As String, readMode As Boolean)
-    'Me.excel.Open(filepath, readMode)
+    #If Debug = False Then
+      Me.excel.Open(filepath, readMode)
+    #End If
   End Sub
   
   Public Sub Close(filepath As String)
-    'Me.excel.Close(filepath)
+    #If Debug = False Then
+      Me.excel.Close(filepath)
+    #End If
   End Sub
   
   ''' <summary>
@@ -42,9 +46,11 @@ Public Class ExcelReaderByColumnTree
   ''' </summary>
   Private Sub Read(row As Integer, filepath As String, sheetName As String, columnNodes As ExcelColumnNode, result As IDictionary(Of String, String))
     Dim cell As Cell = Cell.Create(row, columnNodes.GetCol)
-    'Dim value As String = excel.Read(New ExcelData("", filepath, sheetName, cell))
-    Dim value As String = debugRead(row, filepath, sheetName, cell).ToString
-    
+    #If Debug Then
+      Dim value As String = debugRead(row, filepath, sheetName, cell).ToString
+    #Else
+      Dim value As String = excel.Read(filepath, sheetName, cell)
+    #End If
     ' データテーブルに含めるノードかどうか判定
     If columnNodes.ContainedToDataTable Then
       ' 列が重複していないか確かめる
