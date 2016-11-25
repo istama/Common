@@ -64,6 +64,35 @@ Public Module DataRowExtensions
   Public Function HasColumn(dataRow As DataRow, columnName As String) As Boolean
     Return dataRow.Table.Columns.Contains(columnName)
   End Function
+  
+  <System.Runtime.CompilerServices.ExtensionAttribute()>
+  Public Function ToInt(dataRow As DataRow, columnName As String) As Integer
+    Return DirectCast(dataRow(columnName), Integer)
+  End Function
+  
+  <System.Runtime.CompilerServices.ExtensionAttribute()>
+  Public Function ToIntOrDefault(dataRow As DataRow, columnName As String, defaultValue As Integer) As Integer
+    If dataRow.IsNull(columnName) Then
+      Return defaultValue
+    Else
+      Return dataRow.ToInt(columnName)  
+    End If
+  End Function
+  
+  <System.Runtime.CompilerServices.ExtensionAttribute()>
+  Public Function ToDouble(dataRow As DataRow, columnName As String) As Double
+    Return DirectCast(dataRow(columnName), Double)
+  End Function
+  
+  <System.Runtime.CompilerServices.ExtensionAttribute()>
+  Public Function ToDoubleOrDefault(dataRow As DataRow, columnName As String, defaultValue As Double) As Double
+    If dataRow.IsNull(columnName) Then
+      Return defaultValue
+    Else
+      Return dataRow.ToDouble(columnName)  
+    End If
+  End Function
+
 End Module
 
 End Namespace
