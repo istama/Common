@@ -16,6 +16,15 @@ Public Module IEnumerableExtensions
   End Sub
   
   <System.Runtime.CompilerServices.ExtensionAttribute()>
+  Public Sub ForEach(Of T)(c As IEnumerable(Of T), f As Action(Of T, Integer))
+    Dim idx As Integer = 0
+    For Each i As T In c
+      f(i, idx)
+      idx += 1
+    Next
+  End Sub
+    
+  <System.Runtime.CompilerServices.ExtensionAttribute()>
   Public Function All(Of T)(c As IEnumerable(Of T), f As Func(Of T, Boolean)) As Boolean
     Dim fulfill As Boolean = True
     For Each i As T In c
