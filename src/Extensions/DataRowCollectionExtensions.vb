@@ -8,6 +8,13 @@ Namespace Extensions
 Public Module DataRowCollectionExtensions
   
   <System.Runtime.CompilerServices.ExtensionAttribute()>
+  Public Iterator Function ToEnumerable(collection As DataRowCollection) As IEnumerable(Of DataRow)
+    For Each row As DataRow In collection
+      Yield row
+    Next
+  End Function
+  
+  <System.Runtime.CompilerServices.ExtensionAttribute()>
   Public Sub ForEach(collection As DataRowCollection, f As Action(Of DataRow))
     For Each row As DataRow In collection
       f(row)
