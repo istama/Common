@@ -79,6 +79,7 @@
     <Compile Include="src\COM\Cell.vb" />
     <Compile Include="src\COM\Excel2.vb" />
     <Compile Include="src\COM\Excel3.vb" />
+    <Compile Include="src\COM\Excel4.vb" />
     <Compile Include="src\COM\ExcelColumnNode.vb" />
     <Compile Include="src\COM\ExcelReaderByColumnTree.vb" />
     <Compile Include="src\COM\ExcelWriter.vb" />
@@ -87,6 +88,8 @@
     <Compile Include="src\COM\Excel.vb" />
     <Compile Include="src\COM\ExcelException.vb" />
     <Compile Include="src\Data\EnumerableDataRowCollection.vb" />
+    <Compile Include="src\Extensions\DataColumnCollectionExtensions.vb" />
+    <Compile Include="src\Extensions\DataRowCollectionExtensions.vb" />
     <Compile Include="src\Extensions\DataRowExtensions.vb" />
     <Compile Include="src\Extensions\IEnumerableExtensions.vb" />
     <Compile Include="src\Extensions\StringExtensions.vb" />
